@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GoPiGo3 Controller</title>
+    <script>
+        function sendCommand(command) {
+            fetch('/send-command', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ command: command })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                document.getElementById('message').innerText = `Command "${command}" sent!`;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('message').innerText = 'Error sending command';
+            });
+        }
+
+        function runSSHCommand(command) {
+            fetch('/run-ssh-command', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ command: command })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    document.getElementById('message').innerText = `Error: ${data.error}`;
+                } else {
+                    document.getElementById('message').innerText = `Output: ${data.message}`;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('message').innerText = 'Error running SSH command';
+            });
+        }
+        function startProgram() {
+            runSSHCommand('nohup python3 /home/pi/Desktop/codes/gopigo3_remote_control.py &');
+        }
+        function stopProgram() {
+            runSSHCommand('pkill -f gopigo3_remote_control.py');
+        }
+    </script>
+</head>
+<body>
+    <h1>GoPiGo3 Controller</h1>
+    <button onclick="startProgram()">Run GPGONE Program</button>
+    <br><br/>
+    <button onclick="sendCommand('forward')">Forward</button>
+    <button onclick="sendCommand('left')">Left</button>
+    <button onclick="sendCommand('right')">Right</button>
+    <button onclick="sendCommand('stop')">Stop</button>
+    <br><br/>
+    <button onclick="stopProgram()">End GPGONE Program</button>
+    <div id="message"></div>
+</body>
+</html>
