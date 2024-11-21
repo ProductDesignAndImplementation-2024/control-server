@@ -6,7 +6,7 @@ app = Flask(__name__)
 host_ip = '10.0.0.2'
 port = 5000
 
-route = ['r', 'f', 'l', 'f', 'r', 'f']
+route = ["r","l","l","l","f","l","l","r","r","r","r","f","r","r","f","r","f","r","s"]
 
 current_command = None
 
@@ -21,6 +21,16 @@ def request_image():
         return jsonify({"route": route}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@app.route('/send-message', methods=['POST'])
+def send_message():
+    data = request.get_json()
+    if 'message' in data:
+        message = data['message']
+        print(f"Message received: {message}")
+        return jsonify({'status': 'success', 'message': message}), 200
+    else:
+        return jsonify({'error': 'No message specified'}), 400
 
 
 @app.route('/get-command', methods=['GET'])
