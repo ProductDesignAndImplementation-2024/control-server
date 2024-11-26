@@ -1,7 +1,9 @@
 from flask import Flask, request, jsonify, render_template
 import paramiko
+from flask_socketio import SocketIO, emit
 
 app = Flask(__name__)
+socketio = SocketIO(app)
 
 host_ip = '10.0.0.2'
 port = 5000
@@ -28,6 +30,7 @@ def send_message():
     if 'message' in data:
         message = data['message']
         print(f"Message received: {message}")
+        socketio.emit('message', {'message': message})
         return jsonify({'status': 'success', 'message': message}), 200
     else:
         return jsonify({'error': 'No message specified'}), 400
@@ -85,4 +88,5 @@ def run_ssh_command():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host=host_ip, port=port)
+    #app.run(debug=True, host=host_ip, port=port)
+    socketio.run(app, debug=True, host=host_ip, port=port)

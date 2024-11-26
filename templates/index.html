@@ -4,7 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GoPiGo3 Controller</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <script>
+         document.addEventListener('DOMContentLoaded', (event) => {
+            var socket = io();
+
+            socket.on('message', function(data) {
+                document.getElementById('message').innerText = `Message from GoPiGo: ${data.message}`;
+            });
+        });
+
         function sendCommand(command) {
             fetch('/send-command', {
                 method: 'POST',
@@ -57,12 +66,12 @@
     <h1>GoPiGo3 Controller</h1>
     <button onclick="startProgram()">Run GPGONE Program</button>
     <br><br/>
-    <button onclick="sendCommand('forward')">Forward</button>
-    <button onclick="sendCommand('left')">Left</button>
-    <button onclick="sendCommand('right')">Right</button>
-    <button onclick="sendCommand('stop')">Stop</button>
+    <button onclick="sendCommand('start1')">Start GoPiGo 1</button>
+    <button onclick="sendCommand('start2')">Start GoPiGo 2</button>
+    <button onclick="sendCommand('start3')">Start GoPiGo 3</button>
+    <button onclick="sendCommand('stop')">Stop All</button>
     <br><br/>
     <button onclick="stopProgram()">End GPGONE Program</button>
-    <div id="message"></div>
+    <div id="message">Waiting for message...</div>
 </body>
 </html>
