@@ -1,16 +1,19 @@
 from flask import Flask, request, jsonify, render_template
 import paramiko
 from flask_socketio import SocketIO, emit
+from pyModbusTCP.client import ModbusClient
 
 app = Flask(__name__)
 socketio = SocketIO(app)
 
-host_ip = '10.0.0.2'
+host_ip = 'localhost'
 port = 5000
 
 route = ["r","l","l","l","f","l","l","r","r","r","r","f","r","r","f","r","f","r","s"]
 
 current_command = None
+
+c = ModbusClient(host="10.0.0.10")
 
 @app.route('/')
 def index():
@@ -29,7 +32,20 @@ def send_message():
     data = request.get_json()
     if 'message' in data:
         message = data['message']
+        
+        if message[11:] == "waiting for package":
+            if c.write_single_register(16, 0):
+                print("write ok")
+            else:
+                print("write fail")
+        if message[11:] == "waiting for package removal":
+            if c.write_single_register(1, 0):
+                print("write ok")
+            else:
+                print("write fail")
+        
         print(f"Message received: {message}")
+        print(message[11:])
         socketio.emit('message', {'message': message})
         return jsonify({'status': 'success', 'message': message}), 200
     else:
