@@ -34,13 +34,13 @@
             });
         }
 
-        function runSSHCommand(command) {
+        function runSSHCommand(command, ip) {
             fetch('/run-ssh-command', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ command: command })
+                body: JSON.stringify({ command: command, ip: ip })
             })
             .then(response => response.json())
             .then(data => {
@@ -55,25 +55,29 @@
                 document.getElementById('message').innerText = 'Error running SSH command';
             });
         }
-        function startProgram() {
-            runSSHCommand('nohup python3 /home/pi/Desktop/codes/gopigo3_remote_control.py &');
+        function startProgram(ip) {
+            runSSHCommand('python3 /home/pi/Desktop/full_functional_logic.py', ip);
         }
-        function stopProgram() {
-            runSSHCommand('pkill -f gopigo3_remote_control.py');
+        function stopProgram(ip) {
+            runSSHCommand('pkill -f full_functional_logic.py', ip);
         }
     </script>
 </head>
 <body>
     <div class="container">
         <h1>GoPiGo3 Controller</h1>
-        <!-- <button onclick="startProgram()">Run GPGONE Program</button> -->
-        <br><br/>
+<!--         <h2>Start Programs</h2>
+        <button onclick="startProgram('10.0.0.34')">Start GoPiGo 1 program</button>
+        <button onclick="stopProgram('10.0.0.34')">Stop GoPiGo 1 program</button>
+        <button onclick="startProgram('10.0.0.35')">Start GoPiGo 2 program</button>
+        <button onclick="stopProgram('10.0.0.35')">Stop GoPiGo 2 program</button>
+        <br><br/> -->
+        <h2>Send Commands</h2>
         <button onclick="sendCommand('start1')">Start GoPiGo 1</button>
         <button onclick="sendCommand('start2')">Start GoPiGo 2</button>
         <button onclick="sendCommand('start3')">Start GoPiGo 3</button>
         <button onclick="sendCommand('stop')">Stop All</button>
-        <br><br/>
-        <!-- <button onclick="stopProgram()">End GPGONE Program</button> -->
+        <h2>Messages</h2>
         <div id="message">Waiting for message...</div>
     </div>
 </body>
