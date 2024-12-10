@@ -1,15 +1,20 @@
+import sys
+import os
 from flask import Flask, request, jsonify, render_template
 import paramiko
 from flask_socketio import SocketIO, emit
 from pyModbusTCP.client import ModbusClient
+sys.path.append('c:/koulu/ProductDesign/tello-drone-controller')
+
+import intersection_finder as isf
 
 app = Flask(__name__)
 socketio = SocketIO(app)
 
-host_ip = 'localhost'
+host_ip = '10.0.0.2'
 port = 5000
 
-route = ["r","l","l","l","f","l","l","r","r","r","r","f","r","r","f","r","f","r","s"]
+route = ["f","r","f","f","f","r","f"]
 
 current_command = None
 
@@ -22,6 +27,7 @@ def index():
 
 @app.route('/request-route', methods=['GET'])
 def request_image():
+    print(isf.main())
     try:
         return jsonify({"route": route}), 200
     except Exception as e:
@@ -75,10 +81,11 @@ def send_command():
 @app.route('/run-ssh-command', methods=['POST'])
 def run_ssh_command():
     data = request.get_json()
-    if 'command' in data:
+    if 'command' in data and 'ip' in data:
         command = data['command']
+        ip = data['ip']
         try:
-            hostname = '10.0.0.34' #GoPiGo3ONE IP
+            hostname = ip
             port = 22
             username = 'pi'
             password = 'robots1234'
@@ -98,9 +105,10 @@ def run_ssh_command():
             else:
                 return jsonify({'message': output if output else 'Command executed successfully'}), 200
         except Exception as e:
+            print("Error: ", str(e))
             return jsonify({'error': str(e)}), 500
     else:
-        return jsonify({'error': 'No command provided'}), 400
+        return jsonify({'error': 'No command or IP provided'}), 400
 
 
 if __name__ == '__main__':
