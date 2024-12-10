@@ -3,12 +3,10 @@ import os
 from flask import Flask, request, jsonify, render_template
 import paramiko
 from flask_socketio import SocketIO, emit
+from pyModbusTCP.client import ModbusClient
 sys.path.append('c:/koulu/ProductDesign/tello-drone-controller')
 
-
-
 import intersection_finder as isf
-
 
 app = Flask(__name__)
 socketio = SocketIO(app)
@@ -19,6 +17,8 @@ port = 5000
 route = ["f","r","f","f","f","r","f"]
 
 current_command = None
+
+c = ModbusClient(host="10.0.0.10")
 
 @app.route('/')
 def index():
@@ -38,7 +38,20 @@ def send_message():
     data = request.get_json()
     if 'message' in data:
         message = data['message']
+        
+        if message[11:] == "waiting for package":
+            if c.write_single_register(16, 0):
+                print("write ok")
+            else:
+                print("write fail")
+        if message[11:] == "waiting for package removal":
+            if c.write_single_register(1, 0):
+                print("write ok")
+            else:
+                print("write fail")
+        
         print(f"Message received: {message}")
+        print(message[11:])
         socketio.emit('message', {'message': message})
         return jsonify({'status': 'success', 'message': message}), 200
     else:

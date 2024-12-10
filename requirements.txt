@@ -2,3 +2,4 @@ Flask
 Paramiko
 flask-socketio
 eventlet
+pyModbusTCP
