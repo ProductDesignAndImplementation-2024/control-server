@@ -27,8 +27,10 @@ def index():
 
 @app.route('/request-route', methods=['GET'])
 def request_image():
-    print(isf.main())
+    #print(isf.main())
     try:
+        # reset UR-register
+        c.write_single_register(1, 0)
         return jsonify({"route": route}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -39,19 +41,29 @@ def send_message():
     if 'message' in data:
         message = data['message']
         
+        # set UR-registers
         if message[11:] == "waiting for package":
+            if c.write_single_register(1, 1): 
+                print("write ok")
+            else:
+                print("write fail")
+            print(message[11:])
+        if message[11:] == "waiting for package removal":
+            if c.write_single_register(16, 1):
+                print("write ok")
+            else:
+                print("write fail")
+            print(message[11:])
+        if message[8:] == "package removed":
+            # reset UR-register
             if c.write_single_register(16, 0):
                 print("write ok")
             else:
                 print("write fail")
-        if message[11:] == "waiting for package removal":
-            if c.write_single_register(1, 0):
-                print("write ok")
-            else:
-                print("write fail")
+            print(message[8:])
+
         
         print(f"Message received: {message}")
-        print(message[11:])
         socketio.emit('message', {'message': message})
         return jsonify({'status': 'success', 'message': message}), 200
     else:
