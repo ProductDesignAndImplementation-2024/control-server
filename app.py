@@ -6,7 +6,9 @@ from flask_socketio import SocketIO, emit
 from pyModbusTCP.client import ModbusClient
 sys.path.append('c:/koulu/ProductDesign/tello-drone-controller')
 
-import intersection_finder as isf
+
+#import intersection_finder as isf
+import drone_controlv2 as  drc
 
 app = Flask(__name__)
 socketio = SocketIO(app)
@@ -14,7 +16,9 @@ socketio = SocketIO(app)
 host_ip = '10.0.0.2'
 port = 5000
 
-route = ["f","r","f","f","f","r","f"]
+#route = []#["f","r","f","f","f","r","f"]
+route = []
+route_flag = False
 
 current_command = None
 
@@ -29,8 +33,12 @@ def index():
 def request_image():
     #print(isf.main())
     try:
-        # reset UR-register
-        c.write_single_register(1, 0)
+        global route
+        global route_flag
+        if not route_flag:
+            route = drc.drone_autopilot()
+            #route = ['f', 'r', 'l', 'r', 'l', 'l', 'r', 'r', 'f', 'r', 'l', 'r', 'f', 'f', 'f']
+            route_flag = True     
         return jsonify({"route": route}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -61,6 +69,13 @@ def send_message():
             else:
                 print("write fail")
             print(message[8:])
+        if message[8:] == "picked up package and is requesting route":
+            # reset UR-register
+            if c.write_single_register(1, 0):
+                print("write ok")
+            else:
+                print("write fail")
+            print(message[8:])  
 
         
         print(f"Message received: {message}")
