@@ -1,14 +1,15 @@
 import sys
 import os
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, send_from_directory
 import paramiko
 from flask_socketio import SocketIO, emit
 from pyModbusTCP.client import ModbusClient
 sys.path.append('c:/koulu/ProductDesign/tello-drone-controller')
 
-
-#import intersection_finder as isf
+# Drone files
+import intersection_finder as isf
 import drone_controlv2 as  drc
+
 
 app = Flask(__name__)
 socketio = SocketIO(app)
@@ -16,29 +17,42 @@ socketio = SocketIO(app)
 host_ip = '10.0.0.2'
 port = 5000
 
-#route = []#["f","r","f","f","f","r","f"]
-route = []
-route_flag = False
+#route = []
+#route_flag = False
+
+route_image_path = 'c:/koulu/ProductDesign'
 
 current_command = None
 
 c = ModbusClient(host="10.0.0.10")
 
+
+# API routes
 @app.route('/')
 def index():
     return render_template('index.html')
+
+
+@app.route('/image/<filename>')
+def send_image(filename):
+    return send_from_directory(route_image_path, filename)
 
 
 @app.route('/request-route', methods=['GET'])
 def request_image():
     #print(isf.main())
     try:
+        route = drc.drone_autopilot()
+        isf.main()
+
+        """ 
         global route
         global route_flag
         if not route_flag:
             route = drc.drone_autopilot()
             #route = ['f', 'r', 'l', 'r', 'l', 'l', 'r', 'r', 'f', 'r', 'l', 'r', 'f', 'f', 'f']
-            route_flag = True     
+            route_flag = True
+        """      
         return jsonify({"route": route}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500

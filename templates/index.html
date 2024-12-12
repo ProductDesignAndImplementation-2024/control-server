@@ -13,7 +13,13 @@
             socket.on('message', function(data) {
                 document.getElementById('message').innerHTML = `<strong>Message from GoPiGo:</strong> ${data.message}`;
             });
+            // Refresh the image every 5 seconds
+            setInterval(function() {
+                var img = document.getElementById('route-image');
+                img.src = '/image/intersections_and_paths.png?t=' + new Date().getTime();
+            }, 5000);
         });
+        
 
         function sendCommand(command) {
             fetch('/send-command', {
@@ -79,6 +85,8 @@
         <button onclick="sendCommand('stop')">Stop All</button>
         <h2>Messages</h2>
         <div id="message">Waiting for message...</div>
+        <h2>Route Image</h2>
+        <img id="route-image" src="/image/intersections_and_paths.png" alt="Route Image">
     </div>
 </body>
 </html>
